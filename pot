@@ -1,0 +1,404 @@
+#!/bin/bash
+##############################################################################
+# Pile o' Text
+#   A pint-sized data shoveler for the modern txt-wrangler
+#
+# Copyright (c) 2017 Johan Persson <jzp@bahnhof.se>
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+##############################################################################
+
+
+##############################################################################
+# Config
+##############################################################################
+
+TITLE="Pile o' Text"
+TAGLINE="The best things since sliced strings"
+OUTDIR='out'
+
+
+##############################################################################
+# Templates
+##############################################################################
+
+# TEMPLATE STYLE
+# body {
+#     margin-top:2em;
+#     font-family: 'Source Code Pro', monospace;
+#     background-color: rgb(245, 245, 245);
+#     color: rgb(48,48,48);
+# }
+#
+# hr {
+#     display:none;
+# }
+#
+# header {
+#     text-align:center;
+# }
+#
+# header a:link {
+#     color: rgb(48,48,48);
+#     text-decoration:none;
+# }
+#
+# header a:visited {
+#     color: rgb(48,48,48);
+#     text-decoration:none;
+# }
+#
+# div {
+#     margin: auto;
+#     width: 35em;
+#     margin-bottom: 2em;
+#     margin-top: 2em;
+# }
+#
+# div a:link {
+#     color: rgb(48,48,48);
+#     text-decoration:none;
+# }
+#
+# div a:visited {
+#     color: rgb(48,48,48);
+#     text-decoration:none;
+# }
+#
+# div a:active {
+#     text-decoration:none;
+# }
+#
+# article {
+#     text-align: center;
+#     margin-top:3em;
+#     margin-bottom:3em;
+# }
+#
+# article header {
+#     margin-top:4em;
+# }
+#
+# article a {
+#     color: rgb(225, 163, 238);
+# }
+#
+# article pre {
+#     padding: 1em 1em 0em 1em;
+#     color: rgb(208, 208, 208);
+#     background-color: rgb(48, 48, 48);
+#     font-size:1.1em;
+#     font-family: 'Source Code Pro', monospace;
+#     display: inline-block;
+#     text-align: left;
+# }
+#
+# article code {
+#     color: rgb(237, 169, 135);
+#     font-weight:bold;
+#     font-family: 'Source Code Pro', monospace;
+# }
+#
+# article em {
+#     color: rgb(245, 245, 245);
+# }
+#
+# article strong {
+#     color: rgb(245, 245, 245);
+# }
+#
+# section {
+#     margin-top:3em;
+#     margin-bottom:3em;
+# }
+#
+# footer {
+#     text-align:center;
+# }
+#
+# footer a:link {
+#     color: rgb(48,48,48);
+#     text-decoration:none;
+# }
+#
+# footer a:visited {
+#     color: rgb(48,48,48);
+#     text-decoration:none;
+# }
+#
+# footer a:active {
+#     color: rgb(48,48,48);
+#     text-decoration:none;
+# }
+# END
+#
+# TEMPLATE LAYOUT
+# <!DOCTYPE html>
+# <html>
+# <head>
+#     <title>__SITE_TITLE__ - __PAGE_TITLE__</title>
+#     <meta charset="utf-8">
+#     <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet">
+#     <link href="data:image/x-icon;base64,AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEREREREREAARERERERAQABEBEREQARAAERAAAAEREAAREREREREQABEREAERERAAEREBEBEREAAREREREREQABAQEREQEBAAEQEREREBEAAQEBEREBAQABERERERERAAAAAAAAAAAAAAAAAAAAAAD//wAAgAMAAAABAAAAAQAAAAEAAAABAAAAAQAAAAEAAAABAAAAAQAAAAEAAAABAAAAAQAAAAEAAIADAAD//wAA" rel="icon">
+#     <style>
+#     __STYLE__
+#     </style>
+# </head>
+# <body>
+#     <header>
+#     __HEADER__
+#     </header>
+#     <hr>
+#     __BODY__
+#     <hr>
+#     <footer>
+#     __FOOTER__
+#     </footer>
+#     </body>
+# </html>
+# END
+#
+# TEMPLATE PAGE_BODY
+# <article>
+#     <header>
+#         <h1>__PAGE_TITLE__</h1>
+#         <p><time>__PUBLISHED__</time></p>
+#     </header>
+#     <pre>
+#     __TEXT__
+#     </pre>
+#     <footer>
+#     </footer>
+# </article>
+# END
+#
+# TEMPLATE INDEX_BODY
+# <section>
+#     __ITEMS__
+# </section>
+# END
+#
+# TEMPLATE INDEX_ITEM
+# <div>
+#     <a href="__FILENAME__"><h2>__PAGE_TITLE__</h2><p><time>__PUBLISHED__</time></p></a>
+# </div>
+# END
+#
+# TEMPLATE HEADER
+# <a href="index.html"><h1>__SITE_TITLE__</h1></a>
+# <summary><p>__TAGLINE__</p></summary>
+# END
+#
+# TEMPLATE FOOTER
+# <p>Lovingly crafted with <a href="https://github.com/jozip/pot">Pile o' Text</a></p>
+# END
+
+
+##############################################################################
+# Utilities
+##############################################################################
+
+uncomment() {
+    sed -e 's/^#[ ]\{0,1\}//g'
+}
+
+template() {
+    awk "/TEMPLATE $1$/{flag=1;next}/END$/{flag=0}flag" $0 | uncomment
+}
+
+href() {
+    sed -e 's%\[\(.*\)\](\(.*\))%<a href="\2">\1</a>%g'
+}
+
+em() {
+    sed -e 's%_\(.*\)_%<em>\1</em>%g'
+}
+
+strong() {
+    sed -e 's%\*\(.*\)\*%<strong>\1</strong>%g'
+}
+
+code() {
+    sed -e 's%`\(.*\)`%<code>\1</code>%g'
+}
+
+code_block() {
+    sed -e 's%^\([ ]\{4\}.*\)%<code>\1</code>%'
+}
+
+section_header() {
+    sed -e 's%^\(#\{1,5\}\) \(.*\)$%<strong>\1 \2</strong>%'
+}
+
+season() {
+    href | em | section_header | strong | code | code_block
+}
+
+capitals() {
+    sed -e 's/\b\(.\)/\u\1/g'
+}
+
+spaces() {
+    sed -e 's/[-_]/ /g'
+}
+
+impale() {
+    sed -e 's/[-_ ]/-/g'
+}
+
+lowercase() {
+    sed -e 's/\(.\)/\l\1/g'
+}
+
+filename() {
+    lowercase | impale
+}
+
+title() {
+    spaces | capitals
+}
+
+disable() {
+    sed -e "/__$1__/d"
+}
+
+inject() {
+    sed -e "/__$1__/r $2" -e '//d'
+}
+
+sub() {
+    sed -e "s/__$1__/$2/g"
+}
+
+# Day suffix routine by unknown Stack Overflow user
+day_suffix() {
+  case `date +%-d` in
+    1|21|31) echo "st";;
+    2|22)    echo "nd";;
+    3|23)    echo "rd";;
+    *)       echo "th";;
+  esac
+}
+
+
+##############################################################################
+# Rendering routines
+##############################################################################
+
+new_article() {
+    template 'LAYOUT'                         |
+    inject   'STYLE'  <(template 'STYLE')     |
+    inject   'HEADER' <(template 'HEADER')    |
+    inject   'FOOTER' <(template 'FOOTER')    |
+    inject   'BODY'   <(template 'PAGE_BODY') |
+    disable  'TAGLINE'
+}
+
+new_page() {
+    template 'LAYOUT'                         |
+    inject   'STYLE'  <(template 'STYLE')     |
+    inject   'HEADER' <(template 'HEADER')    |
+    inject   'FOOTER' <(template 'FOOTER')    |
+    inject   'BODY'   <(template 'PAGE_BODY') |
+    disable  'TAGLINE'                        |
+    disable  'PUBLISHED'
+}
+
+new_index() {
+    template 'LAYOUT'                          |
+    inject   'STYLE'  <(template 'STYLE')      |
+    inject   'HEADER' <(template 'HEADER')     |
+    inject   'FOOTER' <(template 'FOOTER')     |
+    inject   'BODY'   <(template 'INDEX_BODY')
+}
+
+process_page() {
+    sub    'SITE_TITLE' "$TITLE"   |
+    sub    'PAGE_TITLE' "$2"       |
+    sub    'PUBLISHED'  "$3"       |
+    sub    'TAGLINE'    "$TAGLINE" |
+    inject 'TEXT' <(cat $1 | season)
+}
+
+process_item() {
+    sub 'FILENAME'   $1   |
+    sub 'PAGE_TITLE' "$2" |
+    sub 'PUBLISHED'  "$3"
+}
+
+process_index() {
+    sub    'SITE_TITLE' "$TITLE"   |
+    sub    'TAGLINE'    "$TAGLINE" |
+    sub    'PAGE_TITLE' "$TAGLINE" |
+    inject 'ITEMS' <(cat $1)
+}
+
+render_pages() {
+    while IFS='|' read -r SOURCE DEST PAGE_TITLE
+    do
+        new_page | process_page $SOURCE "$PAGE_TITLE" > $OUTDIR/$DEST
+    done < <(cat .pages.csv)
+}
+
+render_articles() {
+    while IFS='|' read -r SOURCE DEST PAGE_TITLE PUBLISHED
+    do
+        new_article | process_page $SOURCE "$PAGE_TITLE" "$PUBLISHED" > $OUTDIR/$DEST
+    done < <(cat .articles.csv)
+}
+
+render_index() {
+    ITEMS=$(mktemp /tmp/pot.XXXXXX)
+    while IFS='|' read -r SOURCE DEST PAGE_TITLE PUBLISHED
+    do
+        template 'INDEX_ITEM' | process_item $DEST "$PAGE_TITLE" "$PUBLISHED" >> $ITEMS
+    done < <(cat .articles.csv)
+    new_index | process_index $ITEMS > $OUTDIR/index.html
+    rm $ITEMS
+}
+
+
+##############################################################################
+# Main
+##############################################################################
+
+if [ -n "$2" ]; then
+    SOURCE=$(basename $2)
+    NAME="${SOURCE%.*}"
+    PAGE_TITLE="$(echo $NAME | title)"
+fi
+
+case $1 in
+add)
+    DEST=$(date +'%Y-%m-%d')-$(echo $NAME | filename).html
+    PUBLISHED="$(LC_TIME=en_US.UTF-8 date +"%A, %B %-d`day_suffix`, %Y")"
+    echo "$SOURCE|$DEST|$PAGE_TITLE|$PUBLISHED" >> .articles.csv
+    ;;
+add-page)
+    DEST=$(echo $NAME | filename).html
+    echo "$SOURCE|$DEST|$PAGE_TITLE" >> .pages.csv
+    ;;
+build)
+    mkdir -p $OUTDIR
+    render_pages
+    render_articles
+    render_index
+    ;;
+esac
+
