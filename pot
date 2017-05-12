@@ -346,7 +346,7 @@ process_index() {
     sub    'SITE_TITLE' "$TITLE"   |
     sub    'TAGLINE'    "$TAGLINE" |
     sub    'PAGE_TITLE' "$TAGLINE" |
-    inject 'ITEMS' <(cat $1)
+    inject 'ITEMS'      $1
 }
 
 render_pages() {
@@ -401,4 +401,3 @@ build)
     render_index
     ;;
 esac
-
