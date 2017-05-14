@@ -366,7 +366,7 @@ render_index() {
     while IFS='|' read -r SOURCE DEST PAGE_TITLE PUBLISHED
     do
         template 'INDEX_ITEM' | process_item $DEST "$PAGE_TITLE" "$PUBLISHED" >> $ITEMS
-    done < <(cat .articles.csv)
+    done < <(tac .articles.csv)
     new_index | process_index $ITEMS > $OUTDIR/index.html
     rm $ITEMS
 }
