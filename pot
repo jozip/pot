@@ -3,11 +3,7 @@
 # Pile o' Text
 #   A pint-sized data shoveler for the modern txt-wrangler
 #
-# Written by Johan Persson <jzp@bahnhof.se>
-##############################################################################
-# ISC License
-#
-# Copyright (c) 2017 Johan Persson
+# Copyright (c) 2017 Johan Persson <jzp@bahnhof.se>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -23,18 +19,14 @@
 ##############################################################################
 
 
-##############################################################################
-# Config
-##############################################################################
+### Config ###################################################################
 
 TITLE="Pile o' Text"
 TAGLINE="The best things since sliced strings"
 OUTDIR='out'
 
 
-##############################################################################
-# Templates
-##############################################################################
+### Templates ################################################################
 
 # TEMPLATE STYLE
 # body {
@@ -208,9 +200,7 @@ OUTDIR='out'
 # END
 
 
-##############################################################################
-# Utilities
-##############################################################################
+### Utilities ################################################################
 
 uncomment() {
     sed -e 's/^#[ ]\{0,1\}//g'
@@ -295,9 +285,7 @@ day_suffix() {
 }
 
 
-##############################################################################
-# Rendering routines
-##############################################################################
+### Rendering routines #######################################################
 
 new_article() {
     template 'LAYOUT'                         |
@@ -372,9 +360,7 @@ render_index() {
 }
 
 
-##############################################################################
-# Main
-##############################################################################
+### Main #####################################################################
 
 if [ -n "$2" ]; then
     SOURCE=$(basename $2)
@@ -386,11 +372,11 @@ case $1 in
 add)
     DEST=$(date +'%Y-%m-%d')-$(echo $NAME | filename).html
     PUBLISHED="$(LC_TIME=en_US.UTF-8 date +"%A, %B %-d`day_suffix`, %Y")"
-    echo "$SOURCE|$DEST|$PAGE_TITLE|$PUBLISHED" >> .articles.csv
+    echo "$2|$DEST|$PAGE_TITLE|$PUBLISHED" >> .articles.csv
     ;;
 add-page)
     DEST=$(echo $NAME | filename).html
-    echo "$SOURCE|$DEST|$PAGE_TITLE" >> .pages.csv
+    echo "$2|$DEST|$PAGE_TITLE" >> .pages.csv
     ;;
 build)
     mkdir -p $OUTDIR
