@@ -31,8 +31,17 @@ Build articles, pages and index, and put them in the specified output folder.
 
 ## Installation
 
-	cd <your text directory of choice>
-	cp <path to where you cloned the repo>/pot .
+    cd <your text directory of choice>
+    cp <path to where you cloned the repo>/pot .
+
+## Caveats
+
+Pile o' Text is extremely simple, and thus will come with a slew of drawbacks:
+
+* Two or more of the same markup on the same line, like `_em1_ _em2_` or `*strong1* ... *strong2*` will be incorrectly displayed. (`sed` only support greedy matches.)
+* You can't start a markup on one line and finish on another line.
+* Supports only a very limited version of markdown.
+
 
 ## Author
 
