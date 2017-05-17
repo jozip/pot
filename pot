@@ -234,8 +234,16 @@ section_header() {
     sed -e 's%^\(#\{1,5\}\) \(.*\)$%<strong>\1 \2</strong>%'
 }
 
+lt () {
+    sed -e 's/</\&lt;/g'
+}
+
+gt () {
+    sed -e 's/>/\&gt;/g'
+}
+
 season() {
-    href | em | section_header | strong | code | code_block
+    gt | lt | href | em | section_header | strong | code | code_block
 }
 
 capitals() {
