@@ -259,7 +259,7 @@ spaces() {
 }
 
 impale() {
-    sed -e 's/[-_[:space:]/-/g'
+    sed -e 's/[-_[:space:]]/-/g'
 }
 
 lowercase() {
@@ -331,7 +331,7 @@ process_page() {
     sub    'PAGE_TITLE' "$2"       |
     sub    'PUBLISHED'  "$3"       |
     sub    'TAGLINE'    "$TAGLINE" |
-    inject 'TEXT' <(cat $1 | season)
+    inject 'TEXT' <(cat "$1" | season)
 }
 
 process_item() {
@@ -350,14 +350,14 @@ process_index() {
 render_pages() {
     while IFS='|' read -r SOURCE DEST PAGE_TITLE
     do
-        new_page | process_page $SOURCE "$PAGE_TITLE" > $OUTDIR/$DEST
+        new_page | process_page "$SOURCE" "$PAGE_TITLE" > $OUTDIR/$DEST
     done < <(cat .pages.csv)
 }
 
 render_articles() {
     while IFS='|' read -r SOURCE DEST PAGE_TITLE PUBLISHED
     do
-        new_article | process_page $SOURCE "$PAGE_TITLE" "$PUBLISHED" > $OUTDIR/$DEST
+        new_article | process_page "$SOURCE" "$PAGE_TITLE" "$PUBLISHED" > $OUTDIR/$DEST
     done < <(cat .articles.csv)
 }
 
@@ -375,7 +375,7 @@ render_index() {
 ### Main #####################################################################
 
 if [ -n "$2" ]; then
-    SOURCE=$(basename $2)
+    SOURCE=$(basename "$2")
     NAME="${SOURCE%.*}"
     PAGE_TITLE="$(echo $NAME | title)"
 fi
