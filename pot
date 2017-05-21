@@ -23,7 +23,8 @@
 
 TITLE="Pile o' Text"
 TAGLINE="The best things since sliced strings"
-OUTDIR='out'
+SITE_URL="http://example.com"
+OUTDIR="out"
 
 
 ### Templates ################################################################
@@ -198,6 +199,28 @@ OUTDIR='out'
 # TEMPLATE FOOTER
 # <p>Lovingly crafted with <a href="https://github.com/jozip/pot">Pile o' Text</a></p>
 # END
+#
+# TEMPLATE RSS_FEED
+# <?xml version="1.0" encoding="UTF-8" ?>
+# <rss version="2.0">
+#
+# <channel>
+#   <title>__SITE_TITLE__</title>
+#   <link>__SITE_URL__</link>
+#   <description>__TAGLINE__</description>
+#   <generator>Pile o' Text</generator>
+#   __ITEMS__
+# </channel>
+# </rss>
+# END
+#
+# TEMPLATE RSS_ITEM
+#   <item>
+#     <title>__PAGE_TITLE__</title>
+#     <link>__SITE_URL__/__FILENAME__</link>
+#     <pubDate>__PUBLISHED__</pubDate>
+#   </item>
+# END
 
 
 ### Utilities ################################################################
@@ -283,7 +306,7 @@ inject() {
 }
 
 sub() {
-    sed -e "s/__$1__/$2/g"
+    sed -e "s%__$1__%$2%g"
 }
 
 # Day suffix routine by unknown Stack Overflow user
@@ -326,6 +349,10 @@ new_index() {
     inject   'BODY'   <(template 'INDEX_BODY')
 }
 
+new_feed() {
+    template 'RSS_FEED'
+}
+
 process_page() {
     sub    'SITE_TITLE' "$TITLE"   |
     sub    'PAGE_TITLE' "$2"       |
@@ -335,15 +362,23 @@ process_page() {
 }
 
 process_item() {
-    sub 'FILENAME'   $1   |
-    sub 'PAGE_TITLE' "$2" |
-    sub 'PUBLISHED'  "$3"
+    sub 'FILENAME'   $1        |
+    sub 'PAGE_TITLE' "$2"      |
+    sub 'PUBLISHED'  "$3"      |
+    sub 'SITE_URL'   $SITE_URL
 }
 
 process_index() {
     sub    'SITE_TITLE' "$TITLE"   |
     sub    'TAGLINE'    "$TAGLINE" |
     sub    'PAGE_TITLE' "$TAGLINE" |
+    inject 'ITEMS'      $1
+}
+
+process_feed() {
+    sub    'SITE_TITLE' "$TITLE"   |
+    sub    'TAGLINE'    "$TAGLINE" |
+    sub    'SITE_URL'   $SITE_URL  |
     inject 'ITEMS'      $1
 }
 
@@ -362,12 +397,22 @@ render_articles() {
 }
 
 render_index() {
-    ITEMS=$(mktemp /tmp/pot.XXXXXX)
+    ITEMS=$(mktemp /tmp/pot-index.XXXXXX)
     while IFS='|' read -r SOURCE DEST PAGE_TITLE PUBLISHED
     do
         template 'INDEX_ITEM' | process_item $DEST "$PAGE_TITLE" "$PUBLISHED" >> $ITEMS
     done < <(tac .articles.csv)
     new_index | process_index $ITEMS > $OUTDIR/index.html
+    rm $ITEMS
+}
+
+render_feed() {
+    ITEMS=$(mktemp /tmp/pot-feed.XXXXXX)
+    while IFS='|' read -r SOURCE DEST PAGE_TITLE PUBLISHED
+    do
+        template 'RSS_ITEM' | process_item $DEST "$PAGE_TITLE" "$PUBLISHED" >> $ITEMS
+    done < <(tac .articles.csv)
+    new_feed | process_feed $ITEMS > $OUTDIR/feed.xml
     rm $ITEMS
 }
 
@@ -395,5 +440,6 @@ build)
     render_pages
     render_articles
     render_index
+    render_feed
     ;;
 esac
