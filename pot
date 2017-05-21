@@ -203,7 +203,7 @@ OUTDIR='out'
 ### Utilities ################################################################
 
 uncomment() {
-    sed -e 's/^#[ ]\{0,1\}//g'
+    sed -e 's/^#[[:space:]]\{0,1\}//g'
 }
 
 template() {
@@ -222,18 +222,6 @@ strong() {
     sed -e 's%\*\(.*\)\*%<strong>\1</strong>%g'
 }
 
-code() {
-    sed -e 's%`\(.*\)`%<code>\1</code>%g'
-}
-
-code_block() {
-    sed -e 's%^\([ ]\{4\}.*\)%<code>\1</code>%'
-}
-
-section_header() {
-    sed -e 's%^\(#\{1,5\}\) \(.*\)$%<strong>\1 \2</strong>%'
-}
-
 lt () {
     sed -e 's/</\&lt;/g'
 }
@@ -242,8 +230,24 @@ gt () {
     sed -e 's/>/\&gt;/g'
 }
 
+code() {
+    sed -e 's%`\(.*\)`%<code>\1</code>%g'
+}
+
+code_block() {
+    sed -e 's%^\([[:space:]]\{4\}.*\)%<code>\1</code>%'
+}
+
+section_header() {
+    sed -e 's%^\(#\{1,5\}\)[[:space:]]*\(.*\)$%<strong>\1 \2</strong>%'
+}
+
+quote() {
+    sed -e 's%^>\(.*\)$%>_\1_%'
+}
+
 season() {
-    gt | lt | href | em | section_header | strong | code | code_block
+    quote | lt | gt | em | section_header | strong | href | code | code_block
 }
 
 capitals() {
@@ -255,7 +259,7 @@ spaces() {
 }
 
 impale() {
-    sed -e 's/[-_ ]/-/g'
+    sed -e 's/[-_[:space:]/-/g'
 }
 
 lowercase() {
